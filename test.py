@@ -1,10 +1,11 @@
 from games.tictactoe import TTT
 
 ttt = TTT()
-ttt.play(1, 0)
-ttt.play(2, 1)
-ttt.play(3, 0)
-ttt.play(4, 1)
-ttt.play(5, 0)
-ttt.play(6, 1)
+print(len(TTT.states))
+ttt.act(1, 0)
+ttt.act(2, 1)
+ttt.act(3, 0)
+ttt.act(4, 1)
+ttt.act(5, 0)
+ttt.act(6, 1)
 ttt.display()
