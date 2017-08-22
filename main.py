@@ -74,6 +74,7 @@ def main(iterations, load_dir):
             1: Agent(TTT),
         }
     rewards_per_game = {0: [], 1: []}
+    total_rewards = {0: [], 1: []}
 
     # Environment for learning
     env = Environment(
@@ -93,10 +94,11 @@ def main(iterations, load_dir):
             env.reset()
             print("\r%s / %s" % (i+1, iterations), end="")
             game_rewards = play_game(env, agents)
-            for reward_l, reward in zip(
-                rewards_per_game.values(), game_rewards.values()
-            ):
-                reward_l.append(reward)
+            for player_n in [0, 1]:
+                rewards_per_game[player_n].append(game_rewards[player_n])
+                total_rewards[player_n].append(
+                    agents[player_n].extras['cumul_reward']
+                )
     except KeyboardInterrupt:
         pass
     print()
@@ -107,10 +109,18 @@ def main(iterations, load_dir):
     for agent_n, agent in agents.items():
         agent.save(os.path.join(directory, str(agent_n)))
 
+    # ----------------------------------------------------------------------- #
+    # Plot
+
     # Display cumulated rewards
     import matplotlib.pyplot as plt
     plt.plot(rewards_per_game[0], label="GameReward_%s" % agents[0])
     plt.plot(rewards_per_game[1], label="GameReward_%s" % agents[1])
+    plt.legend()
+    plt.show()
+
+    plt.plot(total_rewards[0], label="CumulReward_%s" % agents[0])
+    plt.plot(total_rewards[1], label="CumulReward_%s" % agents[1])
     plt.legend()
     plt.show()
 
