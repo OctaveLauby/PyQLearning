@@ -60,7 +60,7 @@ class Cell(object):
                 "Cell at %s already played by %s"
                 % (self.position, self.content)
             )
-            self.log.info(msg)
+            self.log.debug(msg)
             raise InvalidPlay(msg)
         self.content = player
 
@@ -189,15 +189,17 @@ class TTT(Game):
         # Check if game is over
         if self.ended:
             self.ended = True
-            self.log.error("Trying to play when game is over.")
+            self.log.debug("Trying to play when game is over.")
             raise GameOver("Game is Over")
 
         # Check the player is the one expected
         if player_n != self.player_n:
-            raise InvalidPlayer(
+            msg = (
                 "Expecting player %s, got player %s."
                 % (self.player_n, player_n)
             )
+            self.log.debug(msg)
+            raise InvalidPlayer(msg)
 
         # Gather cell player want to play on
         cell_n = self.cls.actions[action_n]
