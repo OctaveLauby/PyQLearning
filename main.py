@@ -1,64 +1,79 @@
-from games.common import InvalidPlay
 from games.tictactoe import TTT
 from qlearning.agent import Agent
+from qlearning.environment import Environment
 from qlearning.experience import Experience
 
 
-def play_game(env, agent0, agent1):
-    agent = agent0
-    previous = {}
-    current = {}
+def play_game(env, agents):
+
+    history = {0: {}, 1: {}}
     while not env.game.is_over():
-        current = {}
-        current['state'] = env.state()
-        current['action'] = agent.pick_action(current['state'])
-        try:
-            rewards = env.act(current['action'], agent.number)
-        except InvalidPlay:
-            current['reward'] = -10
-            break
+        for player_n, agent in agents.items():
+            if history[player_n]:
+                exp = Experience(
+                    state=history[player_n]['state'],
+                    action=history[player_n]['action'],
+                    reward=history[player_n]['reward'],
+                    next_state=env.state(),
+                )
+                agent.update(exp)
+            state = env.state()
+            action = agent.pick_action(state)
+            rewards = env.act(action, agent.number)
 
-        agent = agent0 if agent == agent1 else agent1
-        if previous:
+            history[player_n] = {
+                'state': state,
+                'action': action,
+                'reward': rewards[player_n],
+            }
+
+            other_player = 1 - player_n
+            if history[other_player]:
+                history[other_player]['reward'] += rewards[other_player]
+
+    state = env.state()
+    for player_n, hist in history.items():
+        if hist:
             exp = Experience(
-                state=previous['state'],
-                action=previous['action'],
-                reward=previous['reward'] - current['reward'],
-                next_state=current['state'],
+                state=hist['state'],
+                action=hist['action'],
+                reward=hist['reward'],
+                next_state=env.state(),
             )
-            agent.update(exp)
-
-        previous.update(current)
-
-    other_agent = agent0 if agent == agent1 else agent1
-    if current:
-        exp = Experience(
-            state=current['state'],
-            action=current['action'],
-            reward=current['reward'],
-            next_state=env..state(),
-        )
-        other_agent.update(exp)
+            agents[player_n].update(exp)
 
 
 if __name__ == "__main__":
-    agent0 = Agent(TTT)
-    agent1 = Agent(TTT)
-    rewards0 = []
-    rewards1 = []
-    iterations = 100000
+    agents = {
+        0: Agent(TTT),
+        1: Agent(TTT),
+    }
+    rewards = {0: [], 1: []}
 
+    env = Environment(
+        TTT,
+        rewards={
+            'tie': 3,
+            'win': 10,
+            'lose': -10,
+            'invalid': -20,
+            'neutral': 0
+    },
+    )
+
+    iterations = 1000
     try:
         for i in range(iterations):
+            env.reset()
             print("\r%s / %s" % (i, iterations), end="")
-            play_game(TTT(), agent0, agent1)
-            rewards0.append(agent0.cumul_reward)
-            rewards1.append(agent1.cumul_reward)
+            play_game(env, agents)
+            for reward_l, agent in zip(rewards.values(), agents.values()):
+                reward_l.append(agent.cumul_reward)
     except KeyboardInterrupt:
         pass
 
     import matplotlib.pyplot as plt
-    plt.plot(rewards0, label="Creward_%s" % agent0)
-    plt.plot(rewards1, label="Creward_%s" % agent1)
+    plt.plot(rewards[0], label="Creward_%s" % agents[0])
+    plt.plot(rewards[1], label="Creward_%s" % agents[1])
     plt.legend()
     plt.show()
