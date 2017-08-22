@@ -1,4 +1,5 @@
 class Experience(object):
+    """An experience in learning process."""
 
     def __init__(self, state, action, reward, next_state):
         self.state = state

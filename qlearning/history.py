@@ -1,4 +1,5 @@
 class History(object):
+    """History of experiences."""
 
     def __init__(self, max_size):
         self.experiences = []

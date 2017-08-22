@@ -7,10 +7,13 @@ from .history import History
 
 
 class Agent(object):
+    """Agent of QLearing."""
 
     agents_n = 0
 
     def __init__(self, game_cls):
+        """Create an agent given a game class."""
+
         self.number = Agent.agents_n
         Agent.agents_n += 1
 
@@ -34,6 +37,11 @@ class Agent(object):
         self.log = create_logger(str(self), log_level=LOG_LEVEL)
 
     def update(self, experience):
+        """Update agent given an experience.
+
+        Args:
+            experience (qlearning.experience.Experience)
+        """
         self.log.debug("Updating %s with %s.", self, experience)
         self.qupdate(experience)
         self.exploration_rate = max(
@@ -42,16 +50,26 @@ class Agent(object):
         )
 
     def pick_action(self, state):
+        """Return an action given a state.
+
+        Compromise between qvalue and exploration rate.
+        """
         if np.random.rand() <= self.exploration_rate:
             return random.randrange(self.action_size)
         else:
             return self.predict(state)
 
     def predict(self, state):
+        """Return best action given the current qvalue."""
         values = self.qvalues[state]
         return values.index(max(values))
 
     def qupdate(self, experience):
+        """Update qvalue given an experience.
+
+        Args:
+            experience (qlearning.experience.Experience)
+        """
         exp = experience
         self.cumul_reward += exp.reward
         next_action = self.predict(exp.next_state)

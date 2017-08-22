@@ -6,6 +6,7 @@ from parameters import LOG_LEVEL
 
 
 class Environment(object):
+    """Environment for learning."""
 
     rewards = {
         'tie': 3,
@@ -16,6 +17,12 @@ class Environment(object):
     }
 
     def __init__(self, game_cls, rewards=None):
+        """Create an environnemnt given a game class.
+
+        Args:
+            game_cls (cls of games.game.Game)
+            rewards (dict): @see Environment.rewards
+        """
         self.log = create_logger(self.__class__.__name__, LOG_LEVEL)
         self.rewards = dict(Environment.rewards)
         if rewards:
@@ -65,4 +72,5 @@ class Environment(object):
         return rewards
 
     def reset(self):
+        """Restart game."""
         self.game = self.game_cls()
