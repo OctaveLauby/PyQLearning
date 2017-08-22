@@ -118,7 +118,6 @@ class TTT(Game):
         self.winner = None
         self.ended = False
         self.players = [Player(0, "X"), Player(1, "O")]
-        self.player_n = 0  # Current Player
 
         self.log = create_logger(self.__class__.__name__, log_level=LOG_LEVEL)
 

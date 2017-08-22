@@ -5,6 +5,7 @@ class Game(object):
 
     def __init__(self):
         self.cls = self.__class__
+        self.player_n = 0  # Current Player
 
     def is_over(self):
         raise NotImplementedError
