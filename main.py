@@ -1,13 +1,18 @@
+import os
+from datetime import datetime
+
 from games.tictactoe import TTT
 from qlearning.agent import Agent
 from qlearning.environment import Environment
 from qlearning.experience import Experience
+from parameters import RESULT_DIR
 
 
 def play_game(env, agents):
     """Play a game between the 2 agents, and learn from the game."""
 
     history = {0: {}, 1: {}}
+    game_rewards = {0: 0, 1: 0}
     while not env.game.is_over():
         for player_n, agent in agents.items():
             if history[player_n]:
@@ -17,10 +22,13 @@ def play_game(env, agents):
                     reward=history[player_n]['reward'],
                     next_state=env.state(),
                 )
-                agent.update(exp)
+                agent.update_qvalue(exp)
             state = env.state()
             action = agent.pick_action(state)
             rewards = env.act(action, agent.number)
+
+            game_rewards[0] += rewards[0]
+            game_rewards[1] += rewards[1]
 
             history[player_n] = {
                 'state': state,
@@ -41,18 +49,31 @@ def play_game(env, agents):
                 reward=hist['reward'],
                 next_state=env.state(),
             )
-            agents[player_n].update(exp)
+            agents[player_n].update_qvalue(exp)
+
+    for agent in agents.values():
+        agent.update_params()
+
+    return game_rewards
 
 
-def main(iterations):
+def main(iterations, load_dir):
     """Play games to teach 2 agents how to play."""
 
     # Create agents and list of cumulated rewards
-    agents = {
-        0: Agent(TTT),
-        1: Agent(TTT),
-    }
-    rewards = {0: [], 1: []}
+    if load_dir:
+        agents = {
+            0: Agent(TTT),
+            1: Agent(TTT),
+        }
+        agents[0].load(os.path.join(load_dir, "0"))
+        agents[1].load(os.path.join(load_dir, "1"))
+    else:
+        agents = {
+            0: Agent(TTT),
+            1: Agent(TTT),
+        }
+    rewards_per_game = {0: [], 1: []}
 
     # Environment for learning
     env = Environment(
@@ -71,16 +92,25 @@ def main(iterations):
         for i in range(iterations):
             env.reset()
             print("\r%s / %s" % (i+1, iterations), end="")
-            play_game(env, agents)
-            for reward_l, agent in zip(rewards.values(), agents.values()):
-                reward_l.append(agent.cumul_reward)
+            game_rewards = play_game(env, agents)
+            for reward_l, reward in zip(
+                rewards_per_game.values(), game_rewards.values()
+            ):
+                reward_l.append(reward)
     except KeyboardInterrupt:
         pass
+    print()
+
+    # Save agents
+    date_str = "{:%Y-%m-%dT%HH%M}".format(datetime.now())
+    directory = os.path.join(RESULT_DIR, date_str)
+    for agent_n, agent in agents.items():
+        agent.save(os.path.join(directory, str(agent_n)))
 
     # Display cumulated rewards
     import matplotlib.pyplot as plt
-    plt.plot(rewards[0], label="Creward_%s" % agents[0])
-    plt.plot(rewards[1], label="Creward_%s" % agents[1])
+    plt.plot(rewards_per_game[0], label="GameReward_%s" % agents[0])
+    plt.plot(rewards_per_game[1], label="GameReward_%s" % agents[1])
     plt.legend()
     plt.show()
 
@@ -92,5 +122,9 @@ if __name__ == "__main__":
         "-i", "--iterations", type=int, required=False, default=1000,
         help="Number of iterations."
     )
+    parser.add_argument(
+        "-l", "--load_dir", type=str, required=False, default=None,
+        help="Directory from where to load agents, optional."
+    )
     args = parser.parse_args()
-    main(args.iterations)
+    main(iterations=args.iterations, load_dir=args.load_dir)
