@@ -136,13 +136,15 @@ if __name__ == "__main__":
         "-l", "--load_dir", type=str, required=False, default=None,
         help="Directory from where to load agents, optional."
     )
-    parser.add_argument(
-        "-d", "--exploration_decay", type=float,
-        required=False, default=0.995,
-        help="Exploration decay."
-    )
+    for key, default in Agent.params.items():
+        parser.add_argument(
+            "--%s" % key, type=type(default),
+            required=False, default=default,
+            help="%s, default is %s." % (key.replace("_", " "), default)
+        )
     args = parser.parse_args()
     params = {
-        'exploration_decay': args.exploration_decay,
+        key: eval("args.%s" % key)
+        for key in Agent.params
     }
     main(iterations=args.iterations, load_dir=args.load_dir, params=params)

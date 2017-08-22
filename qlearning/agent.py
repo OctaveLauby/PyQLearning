@@ -18,6 +18,13 @@ class Agent(object):
     """Agent of QLearing."""
 
     agents_n = 0
+    params = {
+        'discount_rate': 0.95,
+        'learning_rate': 0.001,
+        'exploration_rate': 1,
+        'exploration_decay': 0.995,
+        'exploration_min': 0.01,
+    }
 
     def __init__(self, game_cls, params={}):
         """Create an agent given a game class.
@@ -49,13 +56,7 @@ class Agent(object):
         }
         self.history = History(10)
 
-        self.params = {
-            'discount_rate': 0.95,
-            'learning_rate': 0.001,
-            'exploration_rate': 1,
-            'exploration_decay': 0.995,
-            'exploration_min': 0.01,
-        }
+        self.params = dict(Agent.params)
         self.set_params(**params)
 
         self.log = create_logger(str(self), log_level=LOG_LEVEL)
