@@ -1,11 +1,3 @@
-class GameOver(Exception):
-    pass
-
-
-class InvalidPlay(Exception):
-    pass
-
-
 class Position(object):
 
     def __init__(self, i, j=None):

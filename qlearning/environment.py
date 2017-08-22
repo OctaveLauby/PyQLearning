@@ -1,5 +1,5 @@
 
-from games.common import GameOver, InvalidPlay
+from games.exceptions import GameOver, InvalidPlay, InvalidPlayer
 
 from utils.log import create_logger
 from parameters import LOG_LEVEL
@@ -32,7 +32,10 @@ class Environment(object):
         return self.game.state()
 
     def act(self, action_n, player_n):
-        """Play action for player and return rewards of all players."""
+        """Play action for player and return rewards of all players.
+
+        Ignore InvalidPlayer and GameOver cases (returns 0 rewards)
+        """
         rewards = {
             player.number: 0
             for player in self.game.players
@@ -44,6 +47,8 @@ class Environment(object):
             rewards[player_n] = self.rewards['invalid']
             return rewards
         except GameOver:
+            return rewards
+        except InvalidPlayer:
             return rewards
 
         # Update rewards

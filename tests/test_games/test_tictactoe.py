@@ -1,7 +1,7 @@
 import pytest
 
 from games.tictactoe import TTT
-from games.common import GameOver, InvalidPlay
+from games.exceptions import GameOver, InvalidPlay, InvalidPlayer
 
 
 def test_TTT():
@@ -15,7 +15,7 @@ def test_TTT():
     assert states[game.state()] == (-1, -1, -1, -1, -1, -1, -1, -1, -1)
 
     # Wrong starter
-    with pytest.raises(InvalidPlay):
+    with pytest.raises(InvalidPlayer):
         game.act(0, 1)
 
     game.act(0, 0)
@@ -23,7 +23,7 @@ def test_TTT():
     game.act(3, 0)
 
     # Wrong player
-    with pytest.raises(InvalidPlay):
+    with pytest.raises(InvalidPlayer):
         game.act(2, 0)
 
     # Playing when already played

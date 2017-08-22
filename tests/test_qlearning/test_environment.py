@@ -25,7 +25,7 @@ def test_Environment():
         1: 0,
     }
     assert env.act(0, 0) == {
-        0: invalid,
+        0: 0,
         1: 0,
     }
     assert env.act(0, 1) == {

@@ -4,8 +4,9 @@ from itertools import product
 from parameters import LOG_LEVEL
 from utils.list import are_same
 from utils.log import create_logger
-from .common import GameOver, InvalidPlay, Position
+from .exceptions import GameOver, InvalidPlay, InvalidPlayer
 from .game import Game
+from .position import Position
 
 
 class Player(object):
@@ -193,7 +194,7 @@ class TTT(Game):
 
         # Check the player is the one expected
         if player_n != self.player_n:
-            raise InvalidPlay(
+            raise InvalidPlayer(
                 "Expecting player %s, got player %s."
                 % (self.player_n, player_n)
             )
