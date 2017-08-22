@@ -19,8 +19,18 @@ class Agent(object):
 
     agents_n = 0
 
-    def __init__(self, game_cls):
-        """Create an agent given a game class."""
+    def __init__(self, game_cls, params={}):
+        """Create an agent given a game class.
+
+        Args:
+            params (dict):
+                discount_rate       default is 0.95
+                learning_rate       default is 0.001
+                exploration_rate    default is 1
+                exploration_decay   default is 0.995
+                exploration_min     default is 0.01
+
+        """
 
         self.number = Agent.agents_n
         Agent.agents_n += 1
@@ -46,8 +56,10 @@ class Agent(object):
             'exploration_decay': 0.995,
             'exploration_min': 0.01,
         }
+        self.set_params(**params)
 
         self.log = create_logger(str(self), log_level=LOG_LEVEL)
+        self.log.info("Agent initialized with params: %s.", self.params)
 
     def set_extras(self, **extras):
         self.extras.update(extras)

@@ -57,21 +57,21 @@ def play_game(env, agents):
     return game_rewards
 
 
-def main(iterations, load_dir):
+def main(iterations, load_dir, params):
     """Play games to teach 2 agents how to play."""
 
     # Create agents and list of cumulated rewards
     if load_dir:
         agents = {
-            0: Agent(TTT),
-            1: Agent(TTT),
+            0: Agent(TTT, params=params),
+            1: Agent(TTT, params=params),
         }
         agents[0].load(os.path.join(load_dir, "0"))
         agents[1].load(os.path.join(load_dir, "1"))
     else:
         agents = {
-            0: Agent(TTT),
-            1: Agent(TTT),
+            0: Agent(TTT, params=params),
+            1: Agent(TTT, params=params),
         }
     rewards_per_game = {0: [], 1: []}
     total_rewards = {0: [], 1: []}
@@ -136,5 +136,13 @@ if __name__ == "__main__":
         "-l", "--load_dir", type=str, required=False, default=None,
         help="Directory from where to load agents, optional."
     )
+    parser.add_argument(
+        "-d", "--exploration_decay", type=float,
+        required=False, default=0.995,
+        help="Exploration decay."
+    )
     args = parser.parse_args()
-    main(iterations=args.iterations, load_dir=args.load_dir)
+    params = {
+        'exploration_decay': args.exploration_decay,
+    }
+    main(iterations=args.iterations, load_dir=args.load_dir, params=params)
