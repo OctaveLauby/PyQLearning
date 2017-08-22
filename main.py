@@ -4,16 +4,16 @@ from qlearning.agent import Agent
 from qlearning.experience import Experience
 
 
-def play_game(game, agent0, agent1):
+def play_game(env, agent0, agent1):
     agent = agent0
     previous = {}
     current = {}
-    while not game.is_over():
+    while not env.game.is_over():
         current = {}
-        current['state'] = game.state()
+        current['state'] = env.state()
         current['action'] = agent.pick_action(current['state'])
         try:
-            current['reward'] = game.act(current['action'], agent.number)
+            rewards = env.act(current['action'], agent.number)
         except InvalidPlay:
             current['reward'] = -10
             break
@@ -36,7 +36,7 @@ def play_game(game, agent0, agent1):
             state=current['state'],
             action=current['action'],
             reward=current['reward'],
-            next_state=game.state(),
+            next_state=env..state(),
         )
         other_agent.update(exp)
 

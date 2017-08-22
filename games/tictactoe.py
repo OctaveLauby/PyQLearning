@@ -4,7 +4,7 @@ from itertools import product
 from parameters import LOG_LEVEL
 from utils.list import are_same
 from utils.log import create_logger
-from .common import InvalidPlay, Position
+from .common import GameOver, InvalidPlay, Position
 from .game import Game
 
 
@@ -35,6 +35,7 @@ class Cell(object):
 
     @property
     def symbol(self):
+        """Return symbol of player that played cell, or empty symbol."""
         if self.content is None:
             return " "
         else:
@@ -42,14 +43,17 @@ class Cell(object):
 
     @property
     def number(self):
+        """Return number of player that played cell, -1 if None."""
         if self.content is None:
             return -1
         return self.content.number
 
     def is_empty(self):
+        """Return whether cell has been played or not."""
         return self.content is None
 
     def play(self, player):
+        """Play cell for player."""
         if self.content:
             msg = (
                 "Cell at %s already played by %s"
@@ -122,6 +126,7 @@ class TTT(Game):
         self.winner = None
         self.ended = False
         self.players = [Player(0, "X"), Player(1, "O")]
+        self.player_n = 0  # Current Player
 
         self.log = create_logger(self.__class__.__name__, log_level=LOG_LEVEL)
 
@@ -180,29 +185,28 @@ class TTT(Game):
             self.ended = -1 not in map(lambda x: x.number, self.cells)
 
     def act(self, action_n, player_n):
-        cell_n = self.cls.actions[action_n]
-        player = self.players[player_n]
+        # Check if game is over
         if self.ended:
             self.ended = True
             self.log.error("Trying to play when game is over.")
-            raise InvalidPlay("Game is Over")
+            raise GameOver("Game is Over")
+
+        # Check the player is the one expected
+        if player_n != self.player_n:
+            raise InvalidPlay(
+                "Expecting player %s, got player %s."
+                % (self.player_n, player_n)
+            )
+
+        # Gather cell player want to play on
+        cell_n = self.cls.actions[action_n]
+        player = self.players[player_n]
+
+        # Play
         self.cells[cell_n].play(player)
+        self.player_n = 1 - self.player_n
         self.history[player].append(Position(cell_n))
         self.check_end()
-
-        if self.ended:
-            self.log.info("Game Over")
-            if self.winner:
-                self.log.info("%s wins !!!" % self.winner)
-
-                if self.winner.number == player_n:
-                    return 10
-                else:
-                    return -10
-
-            return -3
-
-        return 0
 
     # ---- Display
 

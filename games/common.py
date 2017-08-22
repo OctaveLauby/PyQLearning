@@ -1,3 +1,7 @@
+class GameOver(Exception):
+    pass
+
+
 class InvalidPlay(Exception):
     pass
 
@@ -19,4 +23,3 @@ class Position(object):
 
     def __repr__(self):
         return self.__str__()
-
