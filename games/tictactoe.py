@@ -70,6 +70,7 @@ class Cell(object):
 
 
 def states_filter(state):
+    """Return whether state is possible."""
 
     if state.count(0) < state.count(1) or state.count(1) < state.count(0) - 1:
         return False
@@ -77,28 +78,28 @@ def states_filter(state):
     rows = [[i, i+1, i+2] for i in range(0, 3, 6)]
     cols = [[i, i+3, i+6] for i in range(0, 1, 2)]
 
-    winner_cases = 0
+    winner_cases = []
 
     for row_indexes in rows:
         row = [state[ind] for ind in row_indexes]
-        if not row[0] >= 0 and are_same(row):
-            winner_cases += 1
+        if row[0] >= 0 and are_same(row):
+            winner_cases.append(row_indexes)
 
     for col_indexes in cols:
         col = [state[ind] for ind in col_indexes]
-        if not col[0] >= 0 and are_same(col):
-            winner_cases += 1
+        if col[0] >= 0 and are_same(col):
+            winner_cases.append(col_indexes)
 
     diags = [
-        [i + i for i in range(3)],
-        [i + (2 - i) for i in range(3)]
+        [i + i * 3 for i in range(3)],
+        [3 * i + (2 - i) for i in range(3)]
     ]
     for diag_indexes in diags:
         diag = [state[ind] for ind in diag_indexes]
-        if not diag[0] >= 0 and are_same(diag):
-            winner_cases += 1
+        if diag[0] >= 0 and are_same(diag):
+            winner_cases.append(diag_indexes)
 
-    return winner_cases <= 1
+    return len(winner_cases) <= 1
 
 
 class TTT(Game):
