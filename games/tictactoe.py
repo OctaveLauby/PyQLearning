@@ -177,7 +177,7 @@ class TTT(Game):
             self.ended = True
             self.winner = winner_cell.content
         else:
-            self.ended = are_same(self.cells)
+            self.ended = -1 not in map(lambda x: x.number, self.cells)
 
     def act(self, action_n, player_n):
         cell_n = self.cls.actions[action_n]
