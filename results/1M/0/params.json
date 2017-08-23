@@ -1,0 +1,1 @@
+{"learning_rate": 0.001, "exploration_decay": 0.99995, "exploration_rate": 0.01, "discount_rate": 0.95, "exploration_min": 0.01}
