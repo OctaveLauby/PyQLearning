@@ -115,11 +115,12 @@ class TTT(Game):
             for col in range(3):
                 self.board.append(Cell(row, col))
         self.history = defaultdict(list)
-        self.winner = None
-        self.ended = False
         self.players = [Player(0, "X"), Player(1, "O")]
 
-        self.log = create_logger(self.__class__.__name__, log_level=LOG_LEVEL)
+        # State
+        self.player_n = 0
+        self.winner = None
+        self.ended = False
 
     def is_over(self):
         return self.ended
