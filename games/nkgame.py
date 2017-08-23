@@ -164,7 +164,14 @@ class NKGame(Game):
 
     def actions(self):
         """Return list of available actions."""
-        return [cell_i for cell_i, cell in self.cells if cell is not None]
+        return [
+            cell_i
+            for cell_i, cell in enumerate(self.cells)
+            if cell is not None
+        ]
+
+    def actions_all(self):
+        return [cell_i for cell_i in range(self.n ** 2)]
 
     def state(self):
         """Return tuple describing state."""

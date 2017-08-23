@@ -12,11 +12,20 @@ class History(object):
     def clean(self):
         self.experiences = []
 
-    def last(self):
-        return self.experiences[-1]
+    def is_empty(self):
+        return len(self) == 0
+
+    def is_full(self):
+        return len(self) == self.max_size
+
+    def pop(self):
+        return self.experiences.pop(-1)
 
     def total_reward(self):
         return sum(map(lambda exp: exp.reward, self.experiences))
+
+    def __len__(self):
+        return len(self.experiences)
 
     def __iter__(self):
         return self.experiences.__iter__()
