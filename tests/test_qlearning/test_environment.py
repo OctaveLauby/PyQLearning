@@ -1,8 +1,8 @@
 from games.tictactoe import TTT
-from qlearning.environment import Environment
+from qlearning.environment import OldEnvironment
 
 
-def test_Environment():
+def test_OldEnvironment():
 
     tie = 5
     win = 8
@@ -18,7 +18,7 @@ def test_Environment():
         'neutral': neutral,
     }
 
-    env = Environment(TTT, rewards=rewards)
+    env = OldEnvironment(TTT, rewards=rewards)
 
     assert env.act(0, 0) == {
         0: neutral,

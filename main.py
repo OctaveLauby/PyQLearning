@@ -3,7 +3,7 @@ from datetime import datetime
 
 from games.tictactoe import TTT
 from qlearning.agent import Agent
-from qlearning.environment import Environment
+from qlearning.environment import OldEnvironment
 from qlearning.experience import Experience
 from parameters import RESULT_DIR
 
@@ -76,8 +76,8 @@ def main(iterations, load_dir, params):
     rewards_per_game = {0: [], 1: []}
     total_rewards = {0: [], 1: []}
 
-    # Environment for learning
-    env = Environment(
+    # OldEnvironment for learning
+    env = OldEnvironment(
         TTT,
         rewards={
             'tie': 3,

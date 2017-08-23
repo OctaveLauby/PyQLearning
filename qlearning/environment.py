@@ -5,8 +5,8 @@ from utils.log import create_logger
 from parameters import LOG_LEVEL
 
 
-class Environment(object):
-    """Environment for learning."""
+class OldEnvironment(object):
+    """OldEnvironment for learning."""
 
     rewards = {
         'tie': 3,
@@ -21,10 +21,10 @@ class Environment(object):
 
         Args:
             game_cls (cls of games.game.Game)
-            rewards (dict): @see Environment.rewards
+            rewards (dict): @see OldEnvironment.rewards
         """
         self.log = create_logger(self.__class__.__name__, LOG_LEVEL)
-        self.rewards = dict(Environment.rewards)
+        self.rewards = dict(OldEnvironment.rewards)
         if rewards:
             self.rewards.update(rewards)
         self.log.info(
