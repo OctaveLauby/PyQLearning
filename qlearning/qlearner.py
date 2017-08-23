@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import os
+import pickle
 import random
 
 from parameters import LOG_LEVEL, INVALID_REWARD
@@ -9,7 +10,8 @@ from .history import History
 from .experience import Experience
 
 
-QVALUES_FILE = "qvalues.json"
+KWARGS_FILE = "kwargs.json"
+QVALUES_FILE = "qvalues.pkl"
 PARAMS_FILE = "params.json"
 
 
@@ -38,6 +40,14 @@ class QLearner(object):
 
         """
         self.name = name
+        self.log = create_logger(str(self), log_level=LOG_LEVEL)
+
+        self.kwargs = {
+            'name': name,
+            'actions': actions,
+            'hist_size': hist_size,
+        }
+        self.log.info("Created with kwargs: %s.", self.kwargs)
 
         self.actions = actions
         self.action_size = len(self.actions)
@@ -55,9 +65,6 @@ class QLearner(object):
 
         self.init_params(params)
 
-        self.log = create_logger(str(self), log_level=LOG_LEVEL)
-        self.log.info("QLearner initialized with params: %s.", self.params)
-
     # ----------------------------------------------------------------------- #
     # Set, Get
 
@@ -68,6 +75,7 @@ class QLearner(object):
     def init_params(self, params):
         self.params = dict(QLearner.params)
         self.params.update(params)
+        self.log.info("Initialized with params: %s.", self.params)
 
     def get_qvalue(self, state, action):
         """Return qvalue(state, action)."""
@@ -197,19 +205,26 @@ class QLearner(object):
     # ----------------------------------------------------------------------- #
     # Load / Save
 
-    def load(self, directory):
+    @ staticmethod
+    def load(directory):
         """Load agent from directory."""
-        path = os.path.join(directory, QVALUES_FILE)
-        self.log.info("Loading qvalues at '%s'", path)
+        path = os.path.join(directory, KWARGS_FILE)
         with open(path) as file:
-            qvalues = json.load(file)
-        self.set_qvalues(qvalues)
+            kwargs = json.load(file)
 
         path = os.path.join(directory, PARAMS_FILE)
-        self.log.info("Loading params at '%s'", path)
         with open(path) as file:
-            params = json.load(file)
-        self.set_params(**params)
+            kwargs['params'] = json.load(file)
+
+        qlearner = QLearner(**kwargs)
+
+        path = os.path.join(directory, QVALUES_FILE)
+        qlearner.log.info("Loading qvalues at '%s'", path)
+        with open(path, "rb") as file:
+            qvalues = pickle.load(file)
+        qlearner.init_qvalues(qvalues)
+
+        return qlearner
 
     def save(self, directory):
         """Save agent to directory."""
@@ -217,10 +232,15 @@ class QLearner(object):
             self.log.info("Creating directory '%s'", directory)
             os.makedirs(directory)
 
+        path = os.path.join(directory, KWARGS_FILE)
+        self.log.info("Saving kwargs at '%s'", path)
+        with open(path, "w") as file:
+            json.dump(self.kwargs, file)
+
         path = os.path.join(directory, QVALUES_FILE)
         self.log.info("Saving qvalues at '%s'", path)
-        with open(path, "w") as file:
-            json.dump(self.qvalues, file)
+        with open(path, "wb") as file:
+            pickle.dump(self.qvalues, file)
 
         path = os.path.join(directory, PARAMS_FILE)
         self.log.info("Saving params at '%s'", path)

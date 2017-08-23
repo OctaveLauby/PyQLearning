@@ -36,6 +36,9 @@ def test_QLearner():
     assert str(qlearners[0]) == "QLearner(player_0)"
     assert str(qlearners[1]) == "QLearner(player_1)"
 
+    # ---------------------------------------------------------------------- #
+    # Learning
+
     player = 0
     while not game.is_over():
         action = qlearners[player].pick_action(game.state())
@@ -50,32 +53,43 @@ def test_QLearner():
     winner = game.winner
     for player in [0, 1]:
         if winner is None:
-            qlearners[player].reward(0, game.state())
+            qlearners[player].reward(0, game.state())  # tie game
         elif player == winner:
-            qlearners[player].reward(+1, game.state())
+            qlearners[player].reward(+1, game.state())  # win
         else:
-            qlearners[player].reward(-1, game.state())
+            qlearners[player].reward(-1, game.state())  # lose
         qlearners[player].update()
     game.display()
 
-    assert qlearners[0].get_qvalue(
-        (0, 1, 0, 1, 0, 1, None, None, None), 6
-    ) == pytest.approx(0.1)
-    assert qlearners[0].get_qvalue(
-        (0, 1, 0, 1, None, None, None, None, None), 4
-    ) == pytest.approx(0.01)
-    assert qlearners[0].get_qvalue(
-        (0, 1, None, None, None, None, None, None, None), 2
-    ) == pytest.approx(0.001)
-    assert qlearners[0].get_qvalue(
-        (None, None, None, None, None, None, None, None, None), 0
-    ) == pytest.approx(0.0001)
-    assert qlearners[1].get_qvalue(
-        (0, 1, 0, 1, 0, None, None, None, None), 5
-    ) == pytest.approx(- 0.1)
-    assert qlearners[1].get_qvalue(
-        (0, 1, 0, None, None, None, None, None, None), 3
-    ) == pytest.approx(0)
-    assert qlearners[1].get_qvalue(
-        (0, None, None, None, None, None, None, None, None), 1
-    ) == pytest.approx(0)
+    expected_qvalues = [
+        # (player, state, action, value)
+        (0, (0, 1, 0, 1, 0, 1, None, None, None), 6, 0.1),
+        (0, (0, 1, 0, 1, None, None, None, None, None), 4, 0.01),
+        (0, (0, 1, None, None, None, None, None, None, None), 2, 0.001),
+        (0, (None, None, None, None, None, None, None, None, None), 0, 0.0001),
+        (1, (0, 1, 0, 1, 0, None, None, None, None), 5, - 0.1),
+        (1, (0, 1, 0, None, None, None, None, None, None), 3, 0),
+        (1, (0, None, None, None, None, None, None, None, None), 1, 0),
+    ]
+    for (player, state, action, value) in expected_qvalues:
+        assert qlearners[player].get_qvalue(state, action) == (
+            pytest.approx(value)
+        )
+
+    # ---------------------------------------------------------------------- #
+    # Save / Load
+    import shutil
+
+    shutil.rmtree('tmp')
+
+    directory = "tmp/learner_0"
+    qlearners[0].save(directory)
+    qlearner = QLearner.load(directory)
+    for (player, state, action, value) in expected_qvalues:
+        if player is 1:
+            continue
+        assert qlearner.get_qvalue(state, action) == (
+            pytest.approx(value)
+        )
+
+    shutil.rmtree('tmp')
