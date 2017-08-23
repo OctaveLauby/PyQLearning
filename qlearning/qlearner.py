@@ -134,6 +134,9 @@ class QLearner(object):
     # ----------------------------------------------------------------------- #
     # Learning
 
+    def punish(self, state, action):
+        self.set_qvalue(state, action, INVALID_REWARD)
+
     def reward(self, reward, new_state):
         """Reward QLearner for last action he took."""
         if reward == INVALID_REWARD:
