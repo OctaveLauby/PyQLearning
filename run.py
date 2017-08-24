@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from games.nkgame import NKGame
-from qlearning.agent import Agent
+from qlearning.qlearner import QLearner
 from qlearning.environment import Environment
 from parameters import RESULT_DIR
 
@@ -50,6 +50,7 @@ if __name__ == "__main__":
         help="Number of iterations."
     )
     for key, default in Agent.params.items():
+    for key, default in QLearner.params.items():
         parser.add_argument(
             "--%s" % key, type=type(default),
             required=False, default=default,
@@ -58,6 +59,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     params = {
         key: eval("args.%s" % key)
-        for key in Agent.params
+        for key in QLearner.params
     }
     main(iterations=args.iterations, params=params)
