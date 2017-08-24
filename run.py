@@ -7,12 +7,12 @@ from qlearning.environment import Environment
 from parameters import RESULT_DIR
 
 
-def main(iterations, params):
+def main(game, iterations, params):
     """Play games to teach 2 agents how to play."""
 
     # OldEnvironment for learning
     env = Environment(
-        NKGame(3, 3),
+        game,
         rewards={
             'tie': 3,
             'win': 10,
@@ -47,9 +47,16 @@ if __name__ == "__main__":
     parser = ArgumentParser("Train two agents on TicTacToe.")
     parser.add_argument(
         "-i", "--iterations", type=int, required=False, default=1000,
-        help="Number of iterations."
+        help="Number of iterations, default is 1000."
     )
-    for key, default in Agent.params.items():
+    parser.add_argument(
+        "-n", "--size", type=int, required=False, default=3,
+        help="Size of game, default is 3."
+    )
+    parser.add_argument(
+        "-k", "--wincase", type=int, required=False, default=3,
+        help="Number of successive cells to win, default is 3."
+    )
     for key, default in QLearner.params.items():
         parser.add_argument(
             "--%s" % key, type=type(default),
@@ -61,4 +68,5 @@ if __name__ == "__main__":
         key: eval("args.%s" % key)
         for key in QLearner.params
     }
-    main(iterations=args.iterations, params=params)
+    game = NKGame(args.size, args.wincase)
+    main(game=game, iterations=args.iterations, params=params)
