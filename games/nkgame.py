@@ -69,7 +69,12 @@ def winners(sub_cells, k):
 class NKGame(Game):
 
     def __init__(self, n, k, **game_kwargs):
-        super().__init__(**game_kwargs)
+        kwargs = {
+            'n': n,
+            'k': k,
+        }
+        kwargs.update(game_kwargs)
+        super().__init__(**kwargs)
 
         assert n >= k
 

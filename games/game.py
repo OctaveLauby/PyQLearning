@@ -1,15 +1,22 @@
+import json
+import os
+
 from parameters import LOG_LEVEL
 from utils.log import create_logger
+
+KWARGS_FILE = "kwargs.json"
 
 
 class Game(object):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.cls = self.__class__
         self.log = create_logger(
             self.__class__.__name__,
             log_level=LOG_LEVEL
         )
+        self.kwargs = kwargs
+        self.kwargs['cls'] = self.__class__.__name__
 
     def is_over(self):
         """Return whether game is over."""
@@ -34,6 +41,15 @@ class Game(object):
     def state(self):
         """Current state."""
         raise NotImplementedError
+
+    def save(self, directory):
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory)
+
+        path = os.path.join(directory, KWARGS_FILE)
+        self.log.info("Save kwargs at '%s'")
+        with open(path, "w") as file:
+            json.dump(self.kwargs, file)
 
     def __str__(self):
         return self.__class__.__name__

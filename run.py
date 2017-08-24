@@ -30,10 +30,10 @@ def main(game, iterations, params):
         pass
     print()
 
-    # Save agents
+    # Save environment
     date_str = "{:%Y-%m-%dT%HH%M}".format(datetime.now())
     directory = os.path.join(RESULT_DIR, date_str)
-    env.save_agents(directory)
+    env.save(directory)
 
     # ----------------------------------------------------------------------- #
     # Plot

@@ -126,9 +126,18 @@ class Environment(object):
         plt.legend()
         plt.show()
 
+    def save(self, directory):
+        self.save_agents(directory)
+        self.save_game(
+            os.path.join(directory, "game")
+        )
+
     def save_agents(self, directory):
         for agent_n, agent in self.agents.items():
             agent.save(os.path.join(directory, str(agent_n)))
+
+    def save_game(self, directory):
+        self.game.save(directory)
 
 
 class OldEnvironment(object):
