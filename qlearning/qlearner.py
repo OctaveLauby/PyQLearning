@@ -67,6 +67,7 @@ class QLearner(object):
 
         # More info
         self.extras = {
+            'cls': self.__class__.__name__,
             'or_params': dict(self.params),
             'iterations': 0,
         }
@@ -236,7 +237,7 @@ class QLearner(object):
 
         path = os.path.join(directory, EXTRAS_FILE)
         qlearner.log.info("Saving extras at '%s'", path)
-        with open(path, "w") as file:
+        with open(path) as file:
             extras = json.load(file)
         qlearner.extras = extras
 
