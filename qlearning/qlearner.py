@@ -13,6 +13,7 @@ from .experience import Experience
 KWARGS_FILE = "kwargs.json"
 QVALUES_FILE = "qvalues.pkl"
 PARAMS_FILE = "params.json"
+EXTRAS_FILE = "extras.json"
 
 
 class QLearner(object):
@@ -22,12 +23,13 @@ class QLearner(object):
     params = {
         'discount_rate': 0.95,
         'learning_rate': 0.001,
-        'exploration_rate': 1,
+        'exploration_rate': 1.,
         'exploration_decay': 0.995,
         'exploration_min': 0.01,
+        'hist_size': 10,
     }
 
-    def __init__(self, name, actions, hist_size=10, params={}):
+    def __init__(self, name, actions, params={}):
         """Create an agent given a game class.
 
         Args:
@@ -45,7 +47,6 @@ class QLearner(object):
         self.kwargs = {
             'name': name,
             'actions': actions,
-            'hist_size': hist_size,
         }
         self.log.info("Created with kwargs: %s.", self.kwargs)
 
@@ -58,12 +59,17 @@ class QLearner(object):
             # Where list_of_qvalues_i if qvalue for actions_i
         }
 
-        self.hist_size = hist_size
+        self.init_params(params)
+
         self.last_action = None
         self.last_state = None
-        self.hist = History(self.hist_size)
+        self.hist = History(self.params['hist_size'])
 
-        self.init_params(params)
+        # More info
+        self.extras = {
+            'or_params': dict(self.params),
+            'iterations': 0,
+        }
 
     # ----------------------------------------------------------------------- #
     # Set, Get
@@ -199,6 +205,7 @@ class QLearner(object):
         self.increment_qvalue(exp.state, exp.action, update)
 
     def update(self):
+        self.extras['iterations'] += 1
         self.learn()
         self.params['exploration_rate'] = max(
             self.params['exploration_rate'] * self.params['exploration_decay'],
@@ -227,6 +234,12 @@ class QLearner(object):
             qvalues = pickle.load(file)
         qlearner.init_qvalues(qvalues)
 
+        path = os.path.join(directory, EXTRAS_FILE)
+        qlearner.log.info("Saving extras at '%s'", path)
+        with open(path, "w") as file:
+            extras = json.load(file)
+        qlearner.extras = extras
+
         return qlearner
 
     def save(self, directory):
@@ -249,6 +262,11 @@ class QLearner(object):
         self.log.info("Saving params at '%s'", path)
         with open(path, "w") as file:
             json.dump(self.params, file)
+
+        path = os.path.join(directory, EXTRAS_FILE)
+        self.log.info("Saving extras at '%s'", path)
+        with open(path, "w") as file:
+            json.dump(self.extras, file)
 
     def __str__(self):
         return "QLearner(%s)" % self.name
